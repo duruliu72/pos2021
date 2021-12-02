@@ -1,10 +1,23 @@
 const express = require('express');
 const router=express.Router();
-const _ = require('lodash');
+const path = require('path');
 const {validate,validateArticleForUpdate } = require("../models/article");
 const {getCon} = require("../dbCon");
+const multer  = require('multer')
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public')
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null, file.fieldname + '-' + uniqueSuffix+path.extname(file.originalname))
+    }
+})
+const upload = multer({ storage: storage }).fields([
+    { name: 'imageUrls' }
+])
 router.get('/',(req, res) => {
-    getCon().query("SELECT id,articleCode,articleName,isActive FROM article_msts",(err, articles)=>{
+    getCon().query("SELECT id,articleCode,articleName,brand_id,category_id,gender_id,articleType_id,isActive FROM article_msts",(err, articles)=>{
         if (err) throw err;
         articles.forEach((article,i)=>{ 
             getCon().query("SELECT * FROM article_child WHERE article_id=?",[article.id],function (err,cresult){
@@ -17,29 +30,44 @@ router.get('/',(req, res) => {
         });
     });
 });
-router.post("/", (req, res) => {
-    const { error } = validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-    let company_id = req.body.company_id;
+router.post('/',upload, function (req, res) {
+    // const { error } = validate(req.body);
+    // if (error) return res.status(400).send(error.details[0].message);
+    let company_id = parseInt(req.body.company_id);
     let articleCode = req.body.articleCode;
     let articleName = req.body.articleName;
-    let brand_id = req.body.brand_id;
-    let category_id = req.body.category_id;
-    let gender_id = req.body.gender_id;
-    let articleType_id = req.body.articleType_id;
+    let brand_id = parseInt(req.body.brand_id);
+    let category_id = parseInt(req.body.category_id);
+    let gender_id = parseInt(req.body.gender_id);
+    let articleType_id = parseInt(req.body.articleType_id);
     let isActive=1;
     let isDeleted=0;
     let createdBy=10;
     let createdAt=new Date();
-    // for article Child
-    let sizes=req.body.sizes;
-    let colors=req.body.colors; 
-    let mrps=req.body.mrps; 
-    let prices=req.body.prices;
-    let imageUrls= req.body.imageUrls; 
-    let stockKeepingUnits=req.body.stockKeepingUnits; 
-    let barcodes=req.body.barcodes; 
-    let barcodeViews=req.body.barcodeViews;
+    // for article Child 
+    let sizes=req.body.sizes.split(',');
+    let colors=req.body.colors.split(','); 
+    let mrpsinputs=req.body.mrps.split(',');
+    let mrps=[];
+    mrpsinputs.forEach(item => {
+        mrps.push(parseFloat(item));
+    });
+    let pricesinputs=req.body.prices.split(',');
+    let prices=[];
+    pricesinputs.forEach(item => {
+        prices.push(parseFloat(item));
+    });
+    let imageUrls=[];
+    req.files.imageUrls.forEach((item, index)=>{
+        imageUrls.push(item.filename);
+    })
+    let stockKeepingUnits=req.body.stockKeepingUnits.split(','); 
+    let barcodesinputs=req.body.barcodes.split(',');
+    let barcodes=[];
+    barcodesinputs.forEach(item => {
+        barcodes.push(BigInt(item));
+    });
+    let barcodeViews=req.body.barcodeViews.split(',');
     let findSql='SELECT * FROM article_msts WHERE articleCode = ? && articleName = ?';
     getCon().query(findSql,[articleCode,articleName],async function (err, findRes) {
         if (err) throw err;
@@ -51,10 +79,9 @@ router.post("/", (req, res) => {
             if (err) throw err;
             // article child insert here 
             var articleChildSql="INSERT INTO article_child (article_id,size,color,mrp,price,imageUrl,stockKeepingUnit,barcode,barcodeView) VALUES ?";
-            // var articleChildSql="INSERT INTO article_child (article_id,size,color,mrp,price,stockKeepingUnit,barcode,barcodeView) VALUES (?,?,?,?,?,?,?,?)";
             let articlechilds=[];
             sizes.forEach((size,i) => {
-                articlechilds.push([articleres.insertId,size,colors[i],mrps[i],prices[i],imageUrls[i],stockKeepingUnits[i],barcodes[i],barcodeViews[i]]);
+                articlechilds.push([articleres.insertId,sizes[i],colors[i],mrps[i],prices[i],imageUrls[i],stockKeepingUnits[i],barcodes[i],barcodeViews[i]]);
             });
             getCon().query(articleChildSql,[articlechilds],function (err, articlechildres){
                 if (err) throw err;
@@ -72,104 +99,4 @@ router.post("/", (req, res) => {
         })
     })
 })
-router.put('/:id', async (req, res) => {
-    const { error } = validateArticleForUpdate(req.body); 
-    if (error) return res.status(400).send(error.details[0].message);
-    let article_id=req.params.id;
-    let company_id = req.body.company_id;
-    let articleCode = req.body.articleCode;
-    let articleName = req.body.articleName;
-    let brand_id = req.body.brand_id;
-    let category_id = req.body.category_id;
-    let gender_id = req.body.gender_id;
-    let articleType_id = req.body.articleType_id;
-    let isActive=1;
-    let isDeleted=0;
-    let updatedBy=10;
-    let updatedAt=new Date();
-    // for article Child
-    let childids=req.body.childids;
-    let sizes=req.body.sizes;
-    let colors=req.body.colors; 
-    let mrps=req.body.mrps; 
-    let prices=req.body.prices;
-    let imageUrls= req.body.imageUrls; 
-    let stockKeepingUnits=req.body.stockKeepingUnits; 
-    let barcodes=req.body.barcodes; 
-    let barcodeViews=req.body.barcodeViews;
-    let findSql='SELECT * FROM article_msts WHERE id = ?';
-    getCon().query(findSql,[article_id],function (err, result) {
-        if (err) throw err;
-        if(result.length == 0){
-            return res.status(404).send('The article with the given ID was not found.');
-        }
-        let checkSql ='SELECT * FROM article_msts WHERE articleCode = ? && articleName = ? && NOT id=?';
-        getCon().query(checkSql,[articleCode,articleName,article_id],function (err, result){
-            if (err) throw err;
-            if(result.length > 0){
-                return res.status(400).send("This article already Exist.");
-            } 
-            getCon().query("UPDATE article_msts SET company_id=?, articleCode =?,articleName =?,brand_id=?,category_id=?,gender_id=?,articleType_id=?,isActive=?,isDeleted=?,updatedBy=?,updatedAt=? WHERE id =?",[company_id,articleCode,articleName,brand_id,category_id,gender_id,articleType_id,isActive,isDeleted,updatedBy,updatedAt,article_id],function (err, result) {
-                if (err) throw err;
-                // update articleChilds
-                childids.forEach((childid,i) => {
-                    getCon().query("UPDATE article_child SET size=?,color=?,mrp=?,price=?,imageUrl=?,stockKeepingUnit=?,barcode=?,barcodeView=? WHERE id=?",[sizes[i],colors[i],mrps[i],prices[i],imageUrls[i],stockKeepingUnits[i],barcodes[i],barcodeViews[i],parseInt(childid)],function (err,updateres){
-                        if (err) throw err;
-                        if((childids.length-1)===i){
-                            getCon().query("SELECT id,articleCode,articleName,isActive FROM article_msts WHERE id = ?",[article_id], function (err, result, fields) {
-                                if (err) throw err;
-                                getCon().query("SELECT * FROM article_child WHERE article_id=?",[article_id],function (err, cresult){
-                                    if (err) throw err;
-                                    let article=result[0];
-                                    let articleChildResult=cresult;
-                                    article.childs=articleChildResult;
-                                    return res.send(article);
-                                })
-                            });
-                        }
-                    });
-                });
-            });
-        });
-       
-    })
-  });
-  router.delete('/:id', async (req, res) => {
-    let article_id =req.params.id;
-    let findSql='SELECT id,articleCode,articleName,isActive FROM article_msts WHERE id = ?';
-    getCon().query(findSql,[article_id],function (err, result) {
-        if (err) throw err;
-        if(result.length == 0){
-            return res.status(404).send('The article with the given ID was not found.');
-        }
-        getCon().query("SELECT * FROM article_child WHERE article_id=?",[article_id],function (err,articleChilds){
-            if (err) throw err;
-            getCon().query("DELETE FROM article_msts WHERE id = ?",[article_id],function(err, delarticles) {
-                if (err) throw err;
-                getCon().query("DELETE FROM article_child WHERE article_id = ?",[article_id],function(err, delres) {
-                    if (err) throw err;
-                    let article=result[0];
-                    article.childs=articleChilds;
-                    res.send(article);
-                })
-            })
-        })
-    })
-  });
-  router.get('/:id', async (req, res) => {
-    let article_id =req.params.id;
-    let findSql='SELECT id,articleCode,articleName,isActive FROM article_msts WHERE id = ?';
-    getCon().query(findSql,[article_id],function (err, articles) {
-        if (err) throw err;
-        if(articles.length == 0){
-            return res.status(404).send('The article with the given ID was not found.');
-        }
-        getCon().query("SELECT * FROM article_child WHERE article_id=?",[article_id],function (err,articleChilds){
-            if (err) throw err;
-            let article=articles[0];
-            article.childs=articleChilds;
-            res.send(article);
-        })
-    })
-  });  
 module.exports = router;

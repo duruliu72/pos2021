@@ -1,4 +1,5 @@
 const Joi = require('joi');
+
 function validateArticle(bean) {
   const schema = Joi.object({
     company_id: Joi.number().integer().required(),

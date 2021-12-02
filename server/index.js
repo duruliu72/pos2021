@@ -6,7 +6,6 @@ const port=8080;
 
 process.on("uncaughtException",(ex) =>{
     console.log("asdfasdfduncaughtException",ex);
-    // throw ex;
 });
 process.on("unhandledRejection",(ex) =>{
     console.log("1222222");

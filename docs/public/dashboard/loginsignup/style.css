@@ -1,0 +1,129 @@
+.full-screen{
+    background: #f5f5f5;
+    /* position: relative;
+    height: 100vh; */
+}
+/* Sign Up  */
+.sign-up-section{
+    width: 420px;
+    margin: 0px auto;
+    margin-top: 25px;
+    /* position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%); */
+}
+.sign-up__card .card-header{
+    border-radius: 6px 6px 0px 0px;
+    padding: 40px 20px;
+}
+.bg-img{
+    /* background: url('../img/kashful.jpg') center; */
+}
+.sign-up__card .card-body{
+    padding: 30px;
+}
+.sign-up__card .card-body .form-control{
+    background: #fafafa;
+    height: 46px;
+    padding: 10px 16px;
+    line-height: 1.3333333;
+    font-size: 14px;
+}
+.myqb-btn{
+    display: block;
+    width: 100%;
+    background-color: #EB5757;
+    border-color: #EB5757;
+    transition: all 0.5s ease;
+    position: relative;
+    color: #FFFFFF;
+}
+.myqb-btn .fab{
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+}
+.myqb-btn:hover{
+    background-color: #e20e0e;
+    border-color: #e20e0e;
+}
+.myqb-btn:focus{
+    background-color: #e20e0e !important;
+    border-color: #e20e0e !important;
+    outline-color:#e20e0e !important;
+    outline: none;
+    box-shadow: 0 0 2px #e20e0e !important;
+}
+.myqb-btn:active{
+    background-color: #e20e0e !important;
+    border-color: #e20e0e !important;
+    outline-color:#e20e0e !important;
+    outline: none;
+}
+.btn-fb{
+    color: #fff;
+    background-color: #3b5998;
+    border-color: #344e86;
+}
+.btn-fb:hover,.btn-fb:focus,.btn-fb:active{
+    color: #fff !important;
+    background-color: #30497c !important;
+    border-color: #263961 !important;
+}
+.btn-g{
+    background-color: #fff;
+    border-color: #dfe4e8;
+    color: #000!important;
+}
+.btn-g:hover,.btn-g:focus,.btn-g:active{
+    color: #000 !important;
+    background-color: #ececec !important;
+    border-color: #5f6970 !important;
+}
+.w-email{
+    width: 200px;
+    color:#acb2b5!important;
+    margin: 0 auto;
+    position: relative;
+}
+.login-em{
+    width: 207px;
+}
+.w-social{
+    width: 175px;
+}
+.login-social{
+    width: 164px;
+}
+.w-email::before{
+    position: absolute;
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: #dfe4e8;
+    top: 50%;
+    width: 50px;
+    left: -60px;
+}
+.w-email::after{
+    top: 50%;
+    width: 50px;
+    right: -60px;
+    position: absolute;
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: #dfe4e8;
+}
+.sign-up__card .card-body .myqb-control{
+    height: 38px;
+    padding: 7px 16px;
+    background: #ffffff;
+}

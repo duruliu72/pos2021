@@ -1,22 +1,36 @@
 const express = require('express');
 const router=express.Router();
 const _ = require('lodash');
+const path = require('path');
 const {validate } = require("../models/brand");
 const {getCon} = require("../dbCon");
+const multer  = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public/brands')
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null, file.fieldname + '-' + uniqueSuffix+path.extname(file.originalname))
+    }
+})
+const upload = multer({ storage: storage }).fields([
+    { name: 'imageUrl' }
+])
 router.get('/',(req, res) => {
     let createdAt=new Date();
     console.log(createdAt);
-    getCon().query("SELECT name,description,imageUrl,isActive FROM brands",(err, brands)=>{
+    getCon().query("SELECT id,name,description,imageUrl,isActive FROM brands ORDER BY id DESC",(err, brands)=>{
         if (err) throw err;
         res.send(brands);
     });
 });
-router.post("/", (req, res) => {
-    const { error } = validate(req.body);
+router.post("/",upload, (req, res) => {
+    const { error } = validate({name:req.body.name,description:req.body.description});
     if (error) return res.status(400).send(error.details[0].message);
     let name = req.body.name;
     let description = req.body.description;
-    let imageUrl = req.body.imageUrl;
+    let imageUrl=Object.keys(req.files).length?req.files.imageUrl[0].filename:"";
     let isActive=1;
     let isDeleted=0;
     let createdBy=10;
@@ -32,18 +46,18 @@ router.post("/", (req, res) => {
             if (err) throw err;
             getCon().query("SELECT * FROM brands WHERE id=?",[result.insertId], function (err, result, fields) {
                 if (err) throw err;
-                return res.send(_.pick(result[0], ["id", "name", "description","imageUrl"]));
+                return res.send(_.pick(result[0], ["id", "name", "description","imageUrl","isActive"]));
             });
         })
     })
 })
-router.put('/:id', async (req, res) => {
-    const { error } = validate(req.body); 
+router.put('/:id',upload, (req, res) => {
+    const { error } = validate({name: req.body.name,description:req.body.description}); 
     if (error) return res.status(400).send(error.details[0].message);
     let brandid=req.params.id;
     let name = req.body.name;
     let description = req.body.description;
-    let imageUrl = req.body.imageUrl;
+    let imageUrl=Object.keys(req.files).length?req.files.imageUrl[0].filename:"";
     let isActive=1;
     let isDeleted=0;
     let updatedBy=10;
@@ -62,9 +76,9 @@ router.put('/:id', async (req, res) => {
             } 
             getCon().query("UPDATE brands SET name = ?,description=?,imageUrl=?,isActive=?,isDeleted=?,updatedBy=?,updatedAt=? WHERE id = ?",[name,description,imageUrl,isActive,isDeleted,updatedBy,updatedAt,brandid],function (err, result) {
                 if (err) throw err;
-                getCon().query("SELECT * FROM brands WHERE id=?",[brandid], function (err, result, fields) {
+                getCon().query("SELECT * FROM brands WHERE id=?",[brandid], function (err, upresult, fields) {
                     if (err) throw err;
-                    return res.send(_.pick(result[0], ["id", "name", "description","imageUrl"]));
+                    return res.send(_.pick(upresult[0], ["id", "name", "description","imageUrl","isActive"]));
                 });
             });
         });
@@ -81,7 +95,8 @@ router.put('/:id', async (req, res) => {
         }
         getCon().query("DELETE FROM brands WHERE id = ?",[brandid],function(err, brandres) {
             if (err) throw err;
-            res.send(_.pick(result[0], ["id", "name", "description","imageUrl"]));
+            console.log(result[0])
+            res.send(_.pick(result[0], ["id", "name", "description","imageUrl","isActive"]));
         })
     })
   });
@@ -93,7 +108,7 @@ router.put('/:id', async (req, res) => {
         if(result.length == 0){
             return res.status(404).send('The brand with the given ID was not found.');
         }
-        res.send(_.pick(result[0], ["id", "name", "description","imageUrl"]));
+        res.send(_.pick(result[0], ["id", "name", "description","imageUrl","isActive"]));
     })
   });  
 module.exports = router;

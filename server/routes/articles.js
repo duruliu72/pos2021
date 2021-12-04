@@ -3,7 +3,7 @@ const router=express.Router();
 const path = require('path');
 const {validate,validateArticleForUpdate } = require("../models/article");
 const {getCon} = require("../dbCon");
-const multer  = require('multer')
+const multer  = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, './public')

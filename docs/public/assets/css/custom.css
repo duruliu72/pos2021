@@ -1,0 +1,62 @@
+.dataTables_length label{
+    white-space: nowrap;
+}
+div.dataTables_paginate ul.pagination {
+    justify-content: end;
+    margin-top: 0px;
+}
+div.dataTables_info {
+    padding-top: 0px
+}
+/* Sales Screen */
+.sales-screen{
+    background: #e9ebee;
+}
+.cart-section {
+    overflow: auto;
+    height: 330px;
+    margin-bottom: 15px;
+}
+tbody.cart__tbody {
+    height: 500px;
+    display: table-footer-group;
+}
+.inputstyle {
+    background: #faffbc;
+    border-radius: 0%;
+}
+.inputstyle:focus {
+    background: #faffbc;
+    border-radius: 0%;
+}
+.stock td {
+    border: #17a2b8 1px solid;
+    width: 20px;
+    font-size: 15px;
+}
+.stock td:nth-child(even) {
+    background: #ffffff !important;
+}
+.colors td {
+    border: #17a2b8 1px solid;
+    width: 20px;
+    font-size: 15px;
+}
+.item-details img {
+    width: 120px;
+    height: 120px;
+}
+tr.childs-row td{
+    padding: 4px;
+}
+.childInput {
+    /* background: #faffbc; */
+    border-radius: 0%;
+}
+.childInput:focus {
+    /* background: #faffbc; */
+    border-radius: 0%;
+}
+/* input[type='file'] {
+    opacity:0    
+} */

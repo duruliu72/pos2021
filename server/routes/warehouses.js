@@ -4,7 +4,7 @@ const _ = require('lodash');
 const {validate } = require("../models/warehouse");
 const {getCon} = require("../dbCon");
 router.get('/',(req, res) => {
-    getCon().query("SELECT warehouseCode,warehouseName,warehouseAddress,isActive FROM warehouses",(err, warehouses)=>{
+    getCon().query("SELECT warehouseCode,warehouseName,warehouseAddress,isActive FROM warehouses ORDER BY id DESC",(err, warehouses)=>{
         if (err) throw err;
         res.send(warehouses);
     });

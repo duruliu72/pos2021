@@ -8,6 +8,7 @@ function validateCompany(bean) {
     companyAddress: Joi.string().min(5).max(50).required(),
     companyEmail: Joi.string().min(5).max(50).required(),
     companyPhone: Joi.string().min(5).max(50).required(),
+    description: Joi.string().min(5).max(50).required(),
   });
   return schema.validate(bean);
 }

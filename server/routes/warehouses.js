@@ -4,7 +4,7 @@ const _ = require('lodash');
 const {validate } = require("../models/warehouse");
 const {getCon} = require("../dbCon");
 router.get('/',(req, res) => {
-    getCon().query("SELECT warehouseCode,warehouseName,warehouseAddress,isActive FROM warehouses ORDER BY id DESC",(err, warehouses)=>{
+    getCon().query("SELECT id,warehouseCode,warehouseName,country_id,city_id,warehouseAddress,isActive FROM warehouses ORDER BY id DESC",(err, warehouses)=>{
         if (err) throw err;
         res.send(warehouses);
     });
@@ -32,7 +32,7 @@ router.post("/", (req, res) => {
             if (err) throw err;
             getCon().query("SELECT * FROM warehouses WHERE id=?",[result.insertId], function (err, result, fields) {
                 if (err) throw err;
-                return res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","warehouseAddress","isActive"]));
+                return res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","country_id","city_id","warehouseAddress","isActive"]));
             });
         })
     })
@@ -66,7 +66,7 @@ router.put('/:id', async (req, res) => {
                 if (err) throw err;
                 getCon().query("SELECT * FROM warehouses WHERE id=?",[warehouseid], function (err, result, fields) {
                     if (err) throw err;
-                    return res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","warehouseAddress","isActive"]));
+                    return res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","country_id","city_id","warehouseAddress","isActive"]));
                 });
             });
         });
@@ -83,7 +83,7 @@ router.put('/:id', async (req, res) => {
         }
         getCon().query("DELETE FROM warehouses WHERE id = ?",[warehouseid],function(err, brandres) {
             if (err) throw err;
-            res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","warehouseAddress","isActive"]));
+            res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","country_id","city_id","warehouseAddress","isActive"]));
         })
     })
   });
@@ -95,7 +95,7 @@ router.put('/:id', async (req, res) => {
         if(result.length == 0){
             return res.status(404).send('The warehouse with the given ID was not found.');
         }
-        res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","warehouseAddress","isActive"]));
+        res.send(_.pick(result[0], ["id", "warehouseCode", "warehouseName","country_id","city_id","warehouseAddress","isActive"]));
     })
   });  
 module.exports = router;

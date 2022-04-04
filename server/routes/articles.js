@@ -6,7 +6,7 @@ const {getCon} = require("../dbCon");
 const multer  = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, './public')
+      cb(null, './public/articles')
     },
     filename: function (req, file, cb) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
@@ -17,7 +17,13 @@ const upload = multer({ storage: storage }).fields([
     { name: 'imageUrls' }
 ])
 router.get('/',(req, res) => {
-    getCon().query("SELECT id,articleCode,articleName,brand_id,category_id,gender_id,articleType_id,isActive FROM article_msts",(err, articles)=>{
+    getCon().query(`SELECT article_msts.id,articleCode,articleName,companyName,brands.name AS brandName,category.name AS categoryName,genders.name AS genderName,articletypes.name AS articletypeName,brand_id,category_id,gender_id,articleType_id,article_msts.isActive FROM article_msts 
+    INNER JOIN company ON company.id=article_msts.company_id
+    INNER JOIN brands ON brands.id=article_msts.brand_id
+    INNER JOIN category ON category.id=article_msts.category_id
+    INNER JOIN genders ON genders.id=article_msts.gender_id
+    INNER JOIN articletypes ON articletypes.id=article_msts.articleType_id
+     ORDER BY article_msts.id DESC`,(err, articles)=>{
         if (err) throw err;
         articles.forEach((article,i)=>{ 
             getCon().query("SELECT * FROM article_child WHERE article_id=?",[article.id],function (err,cresult){
@@ -99,4 +105,68 @@ router.post('/',upload, function (req, res) {
         })
     })
 })
+router.get('/:id',(req, res) => {
+    let articleid=req.params.id;
+    let findSql=`SELECT article_msts.id,articleCode,articleName,companyName,brands.name AS brandName,category.name AS categoryName,genders.name AS genderName,articletypes.name AS articletypeName,brand_id,category_id,gender_id,articleType_id,article_msts.isActive FROM article_msts 
+    INNER JOIN company ON company.id=article_msts.company_id
+    INNER JOIN brands ON brands.id=article_msts.brand_id
+    INNER JOIN category ON category.id=article_msts.category_id
+    INNER JOIN genders ON genders.id=article_msts.gender_id
+    INNER JOIN articletypes ON articletypes.id=article_msts.articleType_id
+    WHERE article_msts.id = ?`;
+    getCon().query(findSql,[articleid],(err, articles)=>{
+        if (err) throw err;
+        let article=articles[0];
+        getCon().query("SELECT * FROM article_child WHERE article_id=?",[article.id],function (err,cresult){
+            if (err) throw err;
+            let articleChildResult=cresult;
+            article.childs=articleChildResult;
+            return res.send(article);
+        });
+    });
+});
+router.post('/filterbykey',(req, res) => {
+    let article = req.body.article;
+    let searchSql=`SELECT article_msts.id,articleCode,articleName,companyName,brands.name AS brandName,category.name AS categoryName,genders.name AS genderName,articletypes.name AS articletypeName,brand_id,category_id,gender_id,articleType_id,article_msts.isActive FROM article_msts 
+    INNER JOIN company ON company.id=article_msts.company_id
+    INNER JOIN brands ON brands.id=article_msts.brand_id
+    INNER JOIN category ON category.id=article_msts.category_id
+    INNER JOIN genders ON genders.id=article_msts.gender_id
+    INNER JOIN articletypes ON articletypes.id=article_msts.articleType_id
+    WHERE article_msts.articleName LIKE '%${article}%' OR article_msts.articleCode LIKE '%${article}%'`;
+    getCon().query(searchSql,(err, articles)=>{
+        if (err) throw err;
+        if(articles.length == 0){
+            return res.status(404).send(`The article with the search key ${article} is not found.`);
+        }
+        return res.send(articles);
+    });
+});
+router.post('/filterbysize',(req, res) => {
+    let article_id = req.body.article_id;
+    let articleSize = req.body.articleSize;
+    let searchSql=`SELECT article_child.* FROM article_child
+    WHERE article_id =? && size LIKE '%${articleSize}%' group by size`;
+    getCon().query(searchSql,[article_id],(err, sizes)=>{
+        if (err) throw err;
+        if(sizes.length == 0){
+            return res.status(404).send(`This article ${articleSize} size is not found.`);
+        }
+        return res.send(sizes);
+    });
+});
+router.post('/filterbycolor',(req, res) => {
+    let article_id = req.body.article_id;
+    let articleSize = req.body.articleSize;
+    let articleColor = req.body.articleColor;
+    let searchSql=`SELECT article_child.* FROM article_child
+    WHERE article_id=? && size=? && color LIKE '%${articleColor}%'`;
+    getCon().query(searchSql,[article_id,articleSize],(err, colors)=>{
+        if (err) throw err;
+        if(colors.length == 0){
+            return res.status(404).send(`This article color ${articleColor} of ${articleSize} size is not found.`);
+        }
+        return res.send(colors);
+    });
+});
 module.exports = router;

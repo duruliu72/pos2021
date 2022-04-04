@@ -3,14 +3,14 @@ const express=require('express');
 const app = express();
 const {setCon} = require("./dbCon");
 const port=8080;
-
 process.on("uncaughtException",(ex) =>{
-    console.log("asdfasdfduncaughtException",ex);
+    console.log("uncaughtException",ex);
 });
 process.on("unhandledRejection",(ex) =>{
-    console.log("1222222");
+    console.log("unhandledRejection",ex);
     throw ex;
 });
+app.use(express.static('public'));
 require("./startup/routes")(app);
 app.listen(port,()=>{
     setCon();

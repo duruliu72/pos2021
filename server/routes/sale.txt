@@ -1,0 +1,5 @@
+BEGIN
+DECLARE warehouse_id int;
+SET @warehouse_id := (SELECT warehouse_id FROM tbl_sales WHERE id = new.sales_id);
+INSERT INTO tbl_inventory(warehouse_id,article_id,size,color) VALUES (warehouse_id,new.article_id,new.articleSize,new.articleColor);
+END

@@ -11,6 +11,10 @@ const articletypes = require('../routes/articletypes');
 const countries = require('../routes/countries');
 const cities = require('../routes/cities');
 const articles = require('../routes/articles');
+const suppliers = require('../routes/suppliers');
+const purchases = require('../routes/purchases');
+const sales = require('../routes/sales');
+const dispatches = require('../routes/dispatches');
 const fileupload = require('../routes/fileupload');
 const error = require('../middleware/error');
 module.exports = function(app) {
@@ -27,6 +31,10 @@ module.exports = function(app) {
     app.use('/api/countries', countries);
     app.use('/api/cities', cities);
     app.use('/api/articles', articles);
+    app.use('/api/suppliers', suppliers);
+    app.use('/api/purchases', purchases);
+    app.use('/api/sales', sales);
+    app.use('/api/dispatches', dispatches);
     app.use('/api/upload', fileupload);
     app.use(error);
   }
